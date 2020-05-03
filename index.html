@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Игра слов</title>
+    <script src="js/script.js" defer></script>
+  </head>
+  <body>
+    <h1>Давайте поиграем!</h1>
+    <div class="entering-text">
+      <h2>Введите текст, с которым будете играть, и выберите правила игры: </h2>
+        <form name="game-settings" class="game-settings" action="#" onsubmit="submitGameTextAndSettings(); return false" method="post">
+          <!-- TODO: create different game modes etc. -->
+          <label for="user-text">Вставьте текст (не больше 300 символов) сюда:</label>
+          <br>
+          <textarea name="user-text" rows="4" cols="40" maxlength="300" required></textarea>
+          <br>
+          <label for="start-level">Сколько случайных букв удалить из текста для начала?</label>
+          <br>
+          <input type="number" name="start-level" value="1" min="1" max="32" required>
+          <br>
+          <input type="submit" name="" value="Начать игру">
+        </form>
+    </div>
+
+    <div class="game-body">
+      <h2>Попробуйте вставить пропущенные буквы: </h2>
+      <div class="game-content">
+        <h3 class="removed-letters"></h3>
+        <form name="game-content" class="" action="#" onsubmit="checkSolution(); return false" method="post">
+          <label for="game-text">Замените звёздочки на буквы:</label>
+          <br>
+          <textarea name="game-text" rows="4" cols="40"></textarea>
+          <br>
+          <input type="submit" name="" value="Проверить">
+        </form>
+      </div>
+    </div>
+
+
+  </body>
+</html>
