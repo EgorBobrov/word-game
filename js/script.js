@@ -1,8 +1,35 @@
-let ENTERED_TEXT = "";
-let LEVEL = 0;
-let REMOVED_LETTERS = [];
-let POINTS = 0;
 const ALPHABET = "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
+
+let GAME;
+
+class DefaultWordGame {
+    constructor(enteredText, startLevel) {
+        this.enteredText = enteredText;
+        this.startLevel = startLevel;
+        this.level = startLevel;
+        this.removedLetters = [];
+        this.points = 0;
+        this.solutionText = this.enteredText;
+    }
+
+    generateGameText() {
+        if (this.removedLetters.length < this.level) {
+            const lettersToAdd = this.level - this.removedLetters.length;
+            for(let i = 0; i < lettersToAdd; i++) {
+                this.removedLetters.push(createRandomLetter());
+            }
+            this.removedLetters.sort();
+        }
+        this.replaceLetters();
+    }
+
+    replaceLetters() {
+        for (let i = 0; i < this.removedLetters.length; i++) {
+            this.solutionText = replaceSymbolInText(this.solutionText, this.removedLetters[i]);
+        }
+    }
+
+}
 
 function submitGameTextAndSettings() {
     let enteredText = document.forms["game-settings"]["user-text"].value;
@@ -12,72 +39,51 @@ function submitGameTextAndSettings() {
       return false;
     }*/
     let startLevel = document.forms["game-settings"]["start-level"].value;
-    ENTERED_TEXT = enteredText;
-    LEVEL = startLevel;
-    generateGameText();
+    GAME = new DefaultWordGame(enteredText, startLevel);
     document.getElementsByClassName('entering-text')[0].style.display = 'none';
+    updateTextOnScreen();
   }
   
-function generateGameText() {
-    
-    if(REMOVED_LETTERS.length < LEVEL) {
-        const lettersToAdd = LEVEL - REMOVED_LETTERS.length;
-        for(let i = 0; i < lettersToAdd; i++) {
-            REMOVED_LETTERS.push(createRandomLetter());
-        }
-    }
-    REMOVED_LETTERS.sort();
-    console.log("removed letters: " + REMOVED_LETTERS);
-    document.forms["game-content"]["game-text"].value = replaceLetters();
-    document.getElementsByClassName("removed-letters")[0].innerHTML = "Сейчас скрыты буквы: " + REMOVED_LETTERS;
+function updateTextOnScreen() {
+    GAME.generateGameText();
+    document.forms["game-content"]["game-text"].value = GAME.solutionText;
+    document.getElementsByClassName("removed-letters")[0].innerHTML = "Сейчас скрыты буквы: " + GAME.removedLetters;
 }
 
 function checkSolution() {
     let solutionText = document.forms["game-content"]["game-text"].value;
-    if (solutionText.toLowerCase() === ENTERED_TEXT.toLowerCase() && LEVEL <= 32) {
-        POINTS += LEVEL * ENTERED_TEXT.length;
-        alert("Отлично! У вас сейчас " + POINTS + " очков. Переходим на уровень " + ++LEVEL);
-        generateGameText();
+    if (solutionText.toLowerCase() === GAME.enteredText.toLowerCase() && GAME.level <= 32) {
+        GAME.points += GAME.level * GAME.enteredText.length;
+        alert("Отлично! У вас сейчас " + GAME.points + " очков. Переходим на уровень " + ++GAME.level);
+        updateTextOnScreen();
     } 
-    else if (solutionText.toLowerCase() === ENTERED_TEXT.toLowerCase()) {
-        alert("Поздравляю, вы выиграли и набрали " + POINTS + " очков!")
+    else if (solutionText.toLowerCase() === GAME.enteredText.toLowerCase()) {
+        alert("Поздравляю, вы выиграли и набрали " + GAME.points + " очков!")
         resetGame();
     }
-    else if (solutionText.toLowerCase() !== ENTERED_TEXT.toLowerCase()) {
-        alert("Увы, неверно. Вы проиграли, но успели набрать " + POINTS + " очков.")
+    else if (solutionText.toLowerCase() !== GAME.enteredText.toLowerCase()) {
+        alert("Увы, неверно. Вы проиграли, но успели набрать " + GAME.points + " очков.")
         resetGame();
     }
 }
 
 function createRandomLetter() {
     let char = ALPHABET.charAt(Math.floor(Math.random() * ALPHABET.length));
-    if(REMOVED_LETTERS.includes(char)) {
+    if(GAME.removedLetters.includes(char)) {
         return createRandomLetter();
     }
     return char;
 }
 
-function replaceLetters() {
-    let text = ENTERED_TEXT;
-    for (let i = 0; i < REMOVED_LETTERS.length; i++) {
-        text = replaceLetterWithAsterisk(text, REMOVED_LETTERS[i]);
+function replaceSymbolInText(text, symbol, replacement = "*") {
+    if (symbol !== replacement) {
+        text = text.split(symbol).join(replacement);
     }
     return text;
 }
 
-function replaceLetterWithAsterisk(text, letter) {
-    console.log("letter: "+letter);
-    console.log(text + " before replacement");
-    text = text.split(letter).join("*");
-    console.log(text + " after replacement");
-    return text;
-}
-
 function resetGame() {
-    ENTERED_TEXT = "";
-    LEVEL = 0;
-    REMOVED_LETTERS = [];
-    POINTS = 0;
+    GAME = null;
     document.forms["game-settings"]["user-text"].value = "";
     document.forms["game-content"]["game-text"].value = "";
     document.forms["game-settings"]["start-level"].value = 1;
